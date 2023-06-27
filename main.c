@@ -21,13 +21,13 @@ void* receiver(void* argc){
                 sem_post(&lock);
                 event.events = EPOLLIN;
                 if(epoll_ctl (epfd, EPOLL_CTL_ADD, event.data.fd, &event)){
-                    perror ("epoll_ctl");
+                    perror("epoll_ctl");
                 }
                 break;
             }   
             sem_post(&lock);
             if ((nr_events = epoll_wait(epfd, events, MAX_EVENTS, 0)) < 0) {
-                perror ("epoll_wait");
+                perror("epoll_wait");
             }
             for(i = 0; i < nr_events; i++){
                 char buffer[BUFSIZE] = {0};
@@ -37,13 +37,13 @@ void* receiver(void* argc){
                 }
                 else if(sz == 0){ //костыль закрытия сокета
                     if(epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL)){
-                        perror ("epoll_ctl");
+                        perror("epoll_ctl");
                     }
                     if(shutdown(events[i].data.fd, SHUT_RDWR) < 0){
-                        perror ("sock swdn");
+                        perror("sock swdn");
                     }
                     if(close(events[i].data.fd) < 0){
-                        perror ("close");
+                        perror("close");
                     }
                     continue;
                 }
