@@ -28,7 +28,7 @@ void* receiver(void* argc){
                 break;
             }   
             sem_post(&lock);
-            nr_events = epoll_wait(epfd, events, MAX_EVENTS, 1);
+            nr_events = epoll_wait(epfd, events, MAX_EVENTS, 0);
             if (nr_events < 0) {
                 perror ("epoll_wait");
             }
