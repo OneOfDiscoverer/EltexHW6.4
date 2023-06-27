@@ -18,4 +18,8 @@
 #include <time.h>
 #include <sys/epoll.h>
 
+#define NUMOFTREAD  10
+#define MAX_EVENTS  100
+#define BUFSIZE     1024
+
 #endif

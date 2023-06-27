@@ -1,6 +1,4 @@
 #include "main.h"
-#define NUMOFTREAD 10
-#define MAX_EVENTS 100
 
 /*
     обработка с помощью select poll epoll
@@ -28,21 +26,25 @@ void* receiver(void* argc){
                 break;
             }   
             sem_post(&lock);
-            nr_events = epoll_wait(epfd, events, MAX_EVENTS, 0);
-            if (nr_events < 0) {
+            if ((nr_events = epoll_wait(epfd, events, MAX_EVENTS, 0)) < 0) {
                 perror ("epoll_wait");
             }
             for(i = 0; i < nr_events; i++){
-                char buffer[1024] = {0};
-                ssize_t sz = read(events[i].data.fd, buffer, 1024);
+                char buffer[BUFSIZE] = {0};
+                ssize_t sz = read(events[i].data.fd, buffer, sizeof(buffer));
                 if(sz < 0){
                     perror("read");
                 }
                 else if(sz == 0){ //костыль закрытия сокета
-                    int ret = epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
-                    shutdown(events[i].data.fd, SHUT_RDWR);
-                    close(events[i].data.fd);
-                    //perror("read");
+                    if(epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL)){
+                        perror ("epoll_ctl");
+                    }
+                    if(shutdown(events[i].data.fd, SHUT_RDWR) < 0){
+                        perror ("sock swdn");
+                    }
+                    if(close(events[i].data.fd) < 0){
+                        perror ("close");
+                    }
                     continue;
                 }
                 strcat(buffer, "+ ");
